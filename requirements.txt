@@ -8,3 +8,4 @@ python-dotenv
 httpx
 jinja2
 python-multipart
+openenv>=0.1.13

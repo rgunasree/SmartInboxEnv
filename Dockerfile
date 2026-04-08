@@ -12,5 +12,5 @@ COPY . .
 # Set environment path
 ENV PYTHONPATH=/app
 
-# Default execution
-CMD ["python", "inference.py"]
+# Default execution (Hugging Face expects port 7860)
+CMD ["python", "-m", "server.app"]
