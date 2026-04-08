@@ -22,7 +22,7 @@ def run_task(task_id: str):
     done = False
     
     while not done:
-        # 🔴 FIXED SPAM SIGNAL
+        # FIXED SPAM SIGNAL
         is_spam_hint = (
             "ads" in obs.sender.lower() or
             "sale" in obs.subject.lower() or

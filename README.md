@@ -31,14 +31,27 @@ Unlike naive environments, SmartInboxEnv is resistant to reward hacking:
 - **Behavioral Consistency**: Repetitive actions or context-breaking decisions incur dynamic penalties.
 - **Ambiguity Resilience**: Edge cases with unknown senders reward cautious, defensive decision-making.
 
+## 🎮 Interactive Demo & API
+
+The environment is deployed on Hugging Face Spaces with an interactive UI and API.
+
+- **Landing Page**: Access the root URL to see the system overview.
+- **Automated Demo**: Visit `/demo` to watch a pre-programmed agent navigate the environment and see the scoring in real-time.
+- **Interactive API**: Open `/docs` to test different actions manually via the Swagger UI.
+
 ## ⚙️ Why This Environment is Hard
 Unlike standard RL environments, SmartInboxEnv implements:
 - **Strategic Tradeoffs**: Forces agents to prioritize between conflicting high-stakes objectives.
 - **Multi-step Reasoning**: Actions are not binary and require cross-step contextual awareness.
 - **Natural Language Rewards**: Scoring is grounded in response quality, tone, and intent markers.
+- **Anti-Exploitation Design**:
+    - **Keyword Hacking Prevention**: Keyword stuffing is penalized via length-normalized, set-based scoring.
+    - **Behavioral Consistency**: Repetitive actions or context-breaking decisions incur dynamic penalties.
+    - **Ambiguity Resilience**: Edge cases with unknown senders reward cautious, defensive decision-making.
 
 ## 🔄 Episode Structure
-- Sequences of **8 diverse emails** (shuffled) including 🧨 Trade-off and 🎣 Phishing scenarios.
+- Sequences of **7 diverse emails** (shuffled) including 🧨 Trade-off and 🎣 Phishing scenarios.
+- **Reward Signals**: Includes ground-truth matching and cross-step consistency bonuses.
 - **Final score**: Normalized average reward (0.0 - 1.0).
 
 ## ✅ OpenEnv Compliance
