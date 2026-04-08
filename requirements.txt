@@ -1,0 +1,10 @@
+# Core dependencies
+pydantic
+openai
+fastapi
+uvicorn
+pyyaml
+python-dotenv
+httpx
+jinja2
+python-multipart

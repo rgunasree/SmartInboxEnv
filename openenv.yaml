@@ -1,0 +1,21 @@
+name: SmartInboxEnv
+description: A production-grade environment for professional email triage and response management.
+version: 1.0.0
+tasks:
+  - id: easy_classification
+    name: Email Classification
+    difficulty: easy
+    description: Correctly identify email categories and basic actions.
+  - id: medium_prioritization
+    name: Inbox Prioritization
+    difficulty: medium
+    description: Assign correct priority levels based on sender importance and urgency.
+  - id: hard_response
+    name: Contextual Response
+    difficulty: hard
+    description: Handle complex email threads with high-quality responses and escalations.
+metadata:
+  runtime: python3.10
+  action_space: discrete
+  reward_range: [0.0, 1.0]
+  author: AI Systems Engineer
