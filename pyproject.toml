@@ -1,0 +1,17 @@
+[project]
+name = "smart-inbox-env"
+version = "1.0.0"
+description = "Production-grade RL environment for email triage"
+authors = [{ name = "Gunasree R" }]
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "openai"
+]
+
+[tool.setuptools]
+packages = ["env", "models", "tasks", "graders"]
