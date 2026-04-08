@@ -61,8 +61,13 @@ def root():
 
                 <div class="nav-links">
                     <a href="/run-task" class="btn">▶️ Run Full Triage Demo</a>
+                    <a href="/train" class="btn" style="background: #27ae60;">📈 Run Adaptive Training</a>
                     <a href="/docs" class="btn" style="background: #9b59b6;">📖 API Documentation</a>
                 </div>
+                
+                <p style="margin-top: 20px; font-weight: 600; color: #d35400;">
+                    Tip: Try /train to see the agent learn and improve over multiple episodes.
+                </p>
                 
                 <p style="margin-top: 30px; font-size: 0.9em; color: #7f8c8d;">
                     *Note: This Space runs a FastAPI backend. For automated evaluation, please use the API endpoints or see /docs.
@@ -121,7 +126,7 @@ def run_task(task_id: str = "hard_response"):
     return {
         "status": "success",
         "task_id": task_id,
-        "final_score": info.get("final_score"),
+        "final_score": round(info.get("final_score", 0), 2),
         "total_reward": round(total_reward, 2),
         "steps_completed": len(steps),
         "details": steps
@@ -158,6 +163,12 @@ class LearningAgent:
                 self.weights["archive_low"] += lr * (reward - 0.5)
             else:
                 self.weights["archive_low"] -= lr * 0.2 # Penalty for falling for phishing
+        elif "critical" in subject:
+            # Learn to escalate critical issues
+            if action == "escalate":
+                self.weights["reply_high"] += lr * (reward - 0.5)
+            else:
+                self.weights["reply_high"] -= lr * 0.15
         elif obs_before.priority == "high":
             if action == "reply":
                 self.weights["reply_high"] += lr * (reward - 0.5)

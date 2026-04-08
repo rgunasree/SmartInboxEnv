@@ -8,55 +8,173 @@ app_port: 7860
 pinned: false
 ---
 
-# SmartInboxEnv 📧
+# 📧 SmartInboxEnv
 
-A production-grade RL environment for benchmarking AI agents in real-world email triage and decision-making. Built for the OpenEnv Hackathon.
+A production-grade reinforcement learning environment for **decision-making under uncertainty** in email triage.
 
-## 🌍 Real-World Impact
-SmartInboxEnv models real enterprise workflows such as:
-- **Executive assistant triage**: Filtering noise from high-signal requests.
-- **Incident response**: Prioritizing outages and customer complaints under pressure.
-- **Customer success**: Generating context-aware responses with reasoning traces.
+Built for the **OpenEnv Hackathon**.
 
-## 🧠 Environment Design & Innovation
-- **Grounded Reward Signaling**: Rewards are dynamically calculated using multi-factor signals including structural intent and contextual consistency.
-- **Decision Tradeoff Modeling**: Includes conflicting priorities (e.g., Client Escalation vs. Internal Review) where strategic delegation is the optimal path.
-- **Adversarial Robustness**: Features deceptive phishing-style emails with false urgency to test agent resilience against malicious or deceptive signals.
-- **Behavioral Evolution**: SmartInboxEnv evaluates not just correctness, but behavioral consistency and adaptive decision-making over time.
-- **Thread Memory**: Models cross-step dependencies; agents are penalized for breaking consistency across a conversation thread.
+---
+
+## 🚀 What This Actually Tests
+
+This is NOT a spam classifier.
+
+This environment evaluates whether an agent can:
+
+- Choose the **right action** (reply / archive / escalate)
+- Handle **conflicting priorities**
+- Detect **deceptive urgency (phishing)**
+- Maintain **context across multiple steps**
+- Optimize for **long-term reward**
+
+---
+
+## ⚡ Live Demo
+
+- `/` → Instant system probe (1-step environment execution)
+- `/run-task` → Full episode (multi-step decision sequence)
+- `/train` → Watch an agent improve via reward feedback
+- `/docs` → Interactive API (Swagger)
+
+---
+
+## 🧠 Example Output
+
+```json
+{
+  "final_score": 0.69,
+  "total_reward": 5.55,
+  "steps_completed": 8
+}
+```
+
+👉 Not perfect → realistic
+👉 Not random → learnable
+
+---
+
+## 🏗️ Environment Design
+
+### 1. Multi-Step Decision Process
+- Episodes contain 7+ diverse emails
+- Each action affects future rewards
+- Context is preserved across steps
+
+### 2. Action Space
+```json
+{
+  "action_type": "reply | archive | escalate",
+  "email_class": "work | spam | personal",
+  "priority_level": "low | medium | high",
+  "response": "text",
+  "reasoning": "explanation"
+}
+```
+
+### 3. Reward Function (Core Innovation)
+Reward is multi-factor and dynamic:
+
+| Component | Weight |
+| --- | --- |
+| Classification | 0.1 |
+| Priority alignment | 0.1 |
+| Action correctness | 0.2 |
+| Response quality | 0.4 |
+| Reasoning depth | 0.1 |
+| Behavioral consistency | dynamic |
+
+---
+
+## ⚔️ Advanced Scenarios
+
+### 🧨 Conflict Scenario
+**Client escalation vs leadership review**
+- **escalate** → optimal
+- **reply** → partial reward
+- **archive** → penalty
+
+👉 Tests strategic decision-making
+
+### 🎣 Adversarial Phishing
+**Fake high-priority email (malicious intent)**
+- **Reply** → ❌ heavy penalty
+- **Archive correctly** → ✅ full reward
+
+👉 Tests robustness against deception
+
+### 🧠 Context Memory
+- Agents are penalized for:
+- Breaking conversation flow
+- Inconsistent decisions across steps
+
+---
 
 ## 🛡 Anti-Exploitation Design
-Unlike naive environments, SmartInboxEnv is resistant to reward hacking:
-- **Keyword Hacking Prevention**: Keyword stuffing is penalized via length-normalized, set-based scoring (intersections).
-- **Behavioral Consistency**: Repetitive actions or context-breaking decisions incur dynamic penalties.
-- **Sanitized Outputs**: Validates and coerces agent outputs into strict schema-compliant categories.
+- ❌ Keyword stuffing does NOT work
+- ❌ Repetitive actions are penalized
+- ❌ Blind “always reply” fails
 
-## 🎮 Interactive Demo & API
+✔ Reward depends on structured correctness + behavior
 
-The environment is deployed on Hugging Face Spaces with an interactive UI and API.
+---
 
-- **Landing Page**: Access the root URL to see a live system probe.
-- **Adaptive Training Demo**: Visit `/train` to watch a learning agent improve its weights via a feedback loop over multiple episodes.
-- **Automated Execution Demo**: Visit `/run-task` to watch a full episode run with a high-performance agent.
-- **Interactive API Documentation**: Open `/docs` to test different actions manually via the Swagger UI.
+## 📈 Learning Capability
 
-## ⚙️ Why This Environment is Hard
-Unlike standard RL environments, SmartInboxEnv implements:
-- **Strategic Tradeoffs**: Forces agents to prioritize between conflicting high-stakes objectives.
-- **Multi-step Reasoning**: Actions are not binary and require cross-step contextual awareness.
-- **Natural Language Rewards**: Scoring is grounded in response quality, tone, and intent markers.
+Includes `/train` endpoint demonstrating:
+- **ε-greedy exploration**
+- **Reward-based policy updates**
+- **Measurable improvement across episodes**
 
-## 🔄 Episode Structure
-- Sequences of **7 diverse emails** (shuffled) including 🧨 Trade-off and 🎣 Phishing scenarios.
-- **Reward Signals**: Includes ground-truth matching, cross-step consistency bonuses, and behavioral growth rewards.
-- **Final score**: Normalized average reward (0.0 - 1.0) returned in the `info` metadata.
+Example:
+```json
+{
+  "episode_rewards": [3.2, 4.1, 5.3, 5.8, 6.0],
+  "max_improvement_delta": 2.8
+}
+```
 
-## 📈 Proven Learnability
-Unlike static benchmarks, SmartInboxEnv is proven to be learnable. The included `inference.py` demonstrates:
-- **Policy Gradient Adaptation**: An agent that adjusts its decision-making based on reward signals.
-- **Observed Improvement**: Clear convergence trends over multiple episodes, showing measurable intelligence growth.
+---
+
+## 🌍 Real-World Applications
+- Executive assistant automation
+- Incident response prioritization
+- Customer support triage
+- AI email copilots
+
+---
+
+## ⚙️ Architecture
+- FastAPI backend
+- Custom RL environment
+- Reward shaping engine
+- Heuristic + learning agents
+- Hugging Face Spaces deployment
+
+---
+
+## 🧠 Key Insight
+
+Intelligence is not choosing the correct label — it is choosing the correct action under uncertainty.
+
+---
 
 ## ✅ OpenEnv Compliance
-- Implements `step()`, `reset()`, and `state()` APIs using Pydantic data contracts.
-- Provides a standard `inference.py` for automated evaluation.
-- Fully Dockerized and ready for scalable benchmarking.
+- Implements `step()`, `reset()`, `state()`
+- Uses structured Pydantic schemas
+- Includes evaluation-ready inference logic
+- Fully Dockerized for reproducibility
+
+---
+
+## 🏁 Final Note
+
+SmartInboxEnv moves beyond static evaluation and introduces:
+- **Decision intelligence**
+- **Contextual reasoning**
+- **Adversarial robustness**
+- **Learning-based adaptation**
+
+---
+
+👉 Start with `/run-task` or `/train` to see it in action.
