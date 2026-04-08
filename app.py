@@ -55,7 +55,7 @@ def root():
                 <div class="demo-box">
                     <strong>Input Subject:</strong> {obs.subject}<br>
                     <strong>Action Taken:</strong> {action.action_type}<br>
-                    <strong>Computed Reward:</strong> {reward}<br>
+                    <strong>Computed Reward:</strong> {round(reward, 2)}<br>
                     <strong>Env State:</strong> {"Active" if not done else "Finished"}
                 </div>
 
@@ -83,15 +83,28 @@ def run_task(task_id: str = "hard_response"):
     done = False
     
     while not done:
-        # Heuristic-based demo agent
+        # Strategic heuristic-based demo agent
         current_subject = obs.subject
-        action_type = "reply" if obs.priority in ["high", "medium"] else "archive"
-        if "ads" in obs.sender or "fakebank" in obs.sender:
+        
+        if "fakebank" in obs.sender.lower():
             action_type = "archive"
-            
+        elif "CRITICAL" in obs.subject:
+            action_type = "escalate"
+        elif obs.priority in ["high", "medium"]:
+            action_type = "reply"
+        else:
+            action_type = "archive"
+
+        if action_type == "archive":
+            email_class = "spam"
+        elif action_type == "reply":
+            email_class = "work"
+        else:  # escalate
+            email_class = "work"
+
         action = Action(
             action_type=action_type,
-            email_class="spam" if action_type == "archive" else "work",
+            email_class=email_class,
             priority_level=obs.priority,
             response="Automated demo response.",
             reasoning="Context-aware priority triage."
@@ -130,19 +143,31 @@ class LearningAgent:
             
         if obs.priority == "high":
             return "reply" if self.weights["reply_high"] > 0.5 else "archive"
+        elif obs.priority == "medium":
+            return "reply"
         else:
             return "archive" if self.weights["archive_low"] > 0.5 else "reply"
 
     def update(self, obs_before, action, reward):
         lr = 0.1
-        if obs_before.priority == "high" and action == "reply":
-            self.weights["reply_high"] += lr * (reward - 0.5)
-        elif obs_before.priority == "low" and action == "archive":
-            self.weights["archive_low"] += lr * (reward - 0.5)
+        sender = obs_before.sender.lower()
+        subject = obs_before.subject.lower()
+        if "fakebank" in sender or "ads" in sender or "verify" in subject:
+            # Learn to avoid phishing/spam
+            if action == "archive":
+                self.weights["archive_low"] += lr * (reward - 0.5)
+            else:
+                self.weights["archive_low"] -= lr * 0.2 # Penalty for falling for phishing
+        elif obs_before.priority == "high":
+            if action == "reply":
+                self.weights["reply_high"] += lr * (reward - 0.5)
+            elif action == "archive":
+                self.weights["reply_high"] -= lr * 0.1 # Penalty for archiving high priority
 
         # Clamp weights between 0 and 1
+        # Clamp weights between 0.01 and 1
         for k in self.weights:
-            self.weights[k] = max(0.0, min(1.0, self.weights[k]))
+            self.weights[k] = max(0.01, min(1.0, self.weights[k]))
 
 @app.get("/train")
 def train():
@@ -162,9 +187,16 @@ def train():
             prev_obs = obs
             action_type = agent.act(obs)
             
+            sender = obs.sender.lower()
+            subject = obs.subject.lower()
+            if "ads" in sender or "fakebank" in sender or "verify" in subject:
+                email_class = "spam"
+            else:
+                email_class = "work"
+
             action = Action(
                 action_type=action_type,
-                email_class="spam" if "ads" in obs.sender or "fakebank" in obs.sender else "work",
+                email_class=email_class,
                 priority_level=obs.priority,
                 response="Adaptive learning response.",
                 reasoning="Step-by-step policy update based on reward feedback."
@@ -180,8 +212,8 @@ def train():
         "status": "training_complete",
         "description": "Agent weights updated via reward-based feedback loop over 5 episodes.",
         "episode_rewards": episode_rewards,
-        "final_policy_weights": agent.weights,
-        "improvement_delta": round(episode_rewards[-1] - episode_rewards[0], 2),
+        "final_policy_weights": {k: round(v, 2) for k, v in agent.weights.items()},
+        "max_improvement_delta": round(max(episode_rewards) - episode_rewards[0], 2),
         "note": "Higher weights indicate increased confidence in specific actions for specific priorities."
     }
 
