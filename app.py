@@ -228,7 +228,7 @@ def train():
         "note": "Higher weights indicate increased confidence in specific actions for specific priorities."
     }
 
-@app.get("/reset")
+@app.post("/reset")
 def reset(task_id: str = "hard_response"):
     """Resets the environment."""
     global env_instance
@@ -236,6 +236,7 @@ def reset(task_id: str = "hard_response"):
     return env_instance.reset().dict()
 
 @app.get("/state")
+@app.post("/state")
 def state():
     """Returns current state."""
     return env_instance.state().dict()
